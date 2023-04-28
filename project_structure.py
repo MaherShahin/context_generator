@@ -1,9 +1,26 @@
+"""
+This module provides functionality for generating a project structure 
+from a given project directory, ignoring specific patterns if provided.
+"""
+
 import os
 import fnmatch
 from pathlib import Path
 from tree_format import format_tree
 
 def generate_project_structure(project_path, ignore_patterns=None):
+    """
+    Generates a project structure from a given project directory, 
+    ignoring specific patterns if provided.
+
+    Args:
+        project_path (str): The path of the project directory to be analyzed.
+        ignore_patterns (list, optional): A list of patterns to ignore while generating the structure.
+
+    Returns:
+        str: The generated project structure.
+    """
+    
     if ignore_patterns is None:
         ignore_patterns = ['__pycache__', '*.pyc', '.git', '.gitignore', '.env', '.venv']
 

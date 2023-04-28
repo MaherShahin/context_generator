@@ -1,41 +1,27 @@
-import os
 import sys
-from code_analysis import extract_code_info
-from project_structure import generate_project_structure
-import fnmatch
+from gpt_query import GPTQuery
+from project_analyzer import ProjectAnalyzer
+from library_analyzer import LibraryAnalyzer
+from documentation_generator import DocumentationGenerator
 
-def generate_context(project_path):
-    ignore_patterns = ['__pycache__', '*.pyc', '.git', '.gitignore', '.env', '.venv']
-    project_structure = generate_project_structure(project_path, ignore_patterns)
-    structure_text = "The project has the following structure:\n" + "\n" + (project_structure)
+def generate_context(project_path: str) -> str:
+    """
+    Generates context for a given project by analyzing its structure, 
+    imported libraries, classes, functions, and their descriptions.
 
-    imports_text = set()
-    classes_and_functions_text = []
+    Args:
+        project_path (str): The path of the project directory to be analyzed.
 
-    for root, dirs, files in os.walk(project_path):
-        # Skip the .venv directory
-        if '.venv' in dirs:
-            dirs.remove('.venv')
-
-        for file in files:
-            if file.endswith(".py"):
-                file_path = os.path.join(root, file)
-                file_rel = os.path.relpath(file_path, project_path)
-
-                # Skip items matching the ignore patterns
-                if any(fnmatch.fnmatch(file_rel, pattern) for pattern in ignore_patterns):
-                    continue
-
-                imports, classes_and_functions = extract_code_info(file_path)
-                imports_text.update(imports)
-                classes_and_functions_text.extend(classes_and_functions)
-
-    context = f"{structure_text}\n\n"
-    context += "The project uses the following libraries:\n" + ", ".join(sorted(filter(None, imports_text))) + "\n\n"
-    context += "The project contains the following classes and functions:\n" + "\n".join(classes_and_functions_text) + "\n\n"
+    Returns:
+        str: The generated context.
+    """
+    
+    project_analyzer = ProjectAnalyzer(project_path)
+    structure_text, imports_text, class_hierarchy, docstrings = project_analyzer.analyze()
+    documentation_generator = DocumentationGenerator(structure_text, imports_text, class_hierarchy)
+    context = documentation_generator.generate_docs()
 
     return context
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
